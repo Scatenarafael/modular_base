@@ -1,6 +1,36 @@
-def main():
-    print("Hello from modular-base-saas!")
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy import MetaData
+
+from src.modules.core.presentation.http.middlewares.auth_middleware import AuthMiddleware
+from src.modules.core.presentation.http.routers.auth import auth_router
+
+origins = [
+    "http://localhost",
+    "http://localhost:5173",
+    "http://192.168.15.7:5173",
+    "http://192.168.15.6:5173",
+    "http://192.168.1.120:4173",
+    "http://192.168.1.120:5173",
+]
+
+metadata = MetaData()
+
+app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+app.add_middleware(AuthMiddleware)
 
 
-if __name__ == "__main__":
-    main()
+app.include_router(auth_router.router)
+# app.include_router(user_router.router)
+# app.include_router(company_router.router)
+# app.include_router(role_router.router)
+# app.include_router(link_user_to_company_router.router)

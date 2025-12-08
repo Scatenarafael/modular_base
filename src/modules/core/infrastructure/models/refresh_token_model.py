@@ -18,7 +18,7 @@ class RefreshTokenDict(TypedDict):
     replaced_by: str | None
 
 
-class RefreshToken(Base):
+class RefreshTokenModel(Base):
     __tablename__ = "refresh_tokens"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)

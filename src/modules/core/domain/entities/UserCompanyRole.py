@@ -6,7 +6,7 @@ from typing import Optional
 
 from src.modules.core.domain.entities.Company import Company
 from src.modules.core.domain.entities.Role import Role
-from src.modules.core.domain.entities.user import User
+from src.modules.core.domain.entities.User import User
 
 
 @dataclass

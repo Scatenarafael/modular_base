@@ -1,7 +1,8 @@
 # src/infrastructure/database/mappers/company_mapper.py
+from typing import Optional
 from uuid import UUID
 
-from src.modules.core.domain.entities.user import User
+from src.modules.core.domain.entities.User import User
 from src.modules.core.infrastructure.models.user_model import UserModel
 
 
@@ -27,3 +28,11 @@ class UserMapper:
             email=entity.email,
             active=entity.active,
         )
+
+
+class PayloadUpdateUser:
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    email: Optional[str] = None
+    password: Optional[str] = None
+    active: Optional[bool] = None

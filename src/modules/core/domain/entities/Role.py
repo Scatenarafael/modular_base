@@ -5,7 +5,7 @@ from dataclasses import dataclass, field
 from typing import Optional
 
 from src.modules.core.domain.entities.Company import Company
-from src.modules.core.domain.entities.user import User
+from src.modules.core.domain.entities.User import User
 from src.modules.core.domain.entities.UserCompanyRole import UserCompanyRole
 from src.modules.core.domain.entities.WorkDay import WorkDay
 

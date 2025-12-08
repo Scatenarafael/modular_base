@@ -1,12 +1,13 @@
 from typing import Optional, Sequence
+from uuid import UUID
 
 from passlib.context import CryptContext
 from sqlalchemy import delete, orm, select
 
 from src.infrastructure.database.settings.connection import DbConnectionHandler
-from src.modules.core.domain.entities.user import User
+from src.modules.core.domain.entities.User import User
 from src.modules.core.domain.interfaces.iusers_repository import IUsersRepository
-from src.modules.core.infrastructure.mappers.user_mapper import UserMapper
+from src.modules.core.infrastructure.mappers.user_mapper import PayloadUpdateUser, UserMapper
 from src.modules.core.infrastructure.models.company_model import CompanyModel
 from src.modules.core.infrastructure.models.role_model import RoleModel
 from src.modules.core.infrastructure.models.user_company_role_model import UserCompanyRoleModel
@@ -107,10 +108,12 @@ class UsersRepository(IUsersRepository):
         async with DbConnectionHandler() as database:
             try:
                 if database.session:
-                    result = await database.session.execute(select(User).where(User.email == email))  # type: ignore
-                    user = result.scalars().first()
-                    if not user:
+                    result = await database.session.execute(select(UserModel).where(UserModel.email == email))
+                    user_model = result.scalars().first()
+                    if not user_model:
                         raise LookupError("User not found!")
+
+                    user = UserMapper.to_entity(user_model)
                     return user
             except Exception as exception:
                 if database.session:
@@ -118,13 +121,19 @@ class UsersRepository(IUsersRepository):
                 raise exception
 
     @classmethod
-    async def partial_update_by_id(cls, id: str, first_name: str | None, last_name: str | None, email: str | None, hashed_password: str | None, active: bool | None) -> Optional[User]:
+    async def partial_update_by_id(cls, id: UUID, payload: PayloadUpdateUser) -> Optional[User]:
         async with DbConnectionHandler() as database:
             try:
+                first_name = payload.first_name
+                last_name = payload.last_name
+                email = payload.email
+                active = payload.active
+                hashed_password = pwd_ctx.hash(payload.password) if payload.password else None
+
                 if database.session:
-                    result = await database.session.execute(select(User).filter(User.id == id))  # type: ignore
-                    user = result.scalars().first()
-                    if not user:
+                    result = await database.session.execute(select(UserModel).filter(UserModel.id == id))
+                    user_model = result.scalars().first()
+                    if not user_model:
                         raise ValueError("User not found")
 
                 args = {"first_name": first_name, "last_name": last_name, "email": email, "hashed_password": hashed_password, "active": active}
@@ -132,13 +141,17 @@ class UsersRepository(IUsersRepository):
                 not_none_args = {k: v for k, v in args.items() if v is not None}
 
                 for attr, value in not_none_args.items():
-                    setattr(user, attr, value)
+                    setattr(user_model, attr, value)
 
                 if database.session:
-                    database.session.add(user)
+                    database.session.add(user_model)
                     await database.session.commit()
-                    await database.session.refresh(user)
-                    return user  # type: ignore
+                    await database.session.refresh(user_model)
+
+                    user = UserMapper.to_entity(user_model)
+
+                    return user
+
             except Exception as exception:
                 if database.session:
                     await database.session.rollback()

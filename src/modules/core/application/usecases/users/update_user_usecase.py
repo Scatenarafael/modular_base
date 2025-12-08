@@ -1,17 +1,19 @@
-from src.app.controllers.dtos.update_user_dto import PayloadUpdateUserDTO
-from src.infra.settings.logging_config import app_logger
-from src.interfaces.iusers_repository import IUsersRepository
+from typing import cast
+from uuid import UUID
+
+from src.modules.core.application.dtos.users.user_dto import UserDTO
+from src.modules.core.domain.entities.User import User
+from src.modules.core.domain.interfaces.iusers_repository import IUsersRepository
+from src.modules.core.infrastructure.mappers.user_mapper import PayloadUpdateUser
 
 
 class UpdateUserUseCase:
     def __init__(self, users_repository: IUsersRepository):
         self.users_repository = users_repository
 
-    async def execute(self, user_id: str, payload: PayloadUpdateUserDTO):
-        app_logger.info(f"[USER USE CASE] [UPDATE] user_id: {user_id}, payload: {payload}")
+    async def execute(self, user_id: str, payload: PayloadUpdateUser):
+        user = await self.users_repository.partial_update_by_id(id=UUID(user_id), payload=payload)
 
-        user = await self.users_repository.partial_update_by_id(user_id, first_name=payload.first_name, last_name=payload.last_name, email=payload.email, active=payload.active, hashed_password=None)
+        updated_user = cast(User, user)
 
-        app_logger.info(f"[USER USE CASE] [UPDATE] user_id: {user_id}, user: {user}")
-
-        return user
+        return UserDTO(first_name=updated_user.first_name, last_name=updated_user.last_name, email=updated_user.email, active=updated_user.active)
