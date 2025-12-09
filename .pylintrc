@@ -15,11 +15,12 @@ disable =
       R0903, # Too few public methods (1/2) (too-few-public-methods)
       R1710, # Either all return statements in a function should return an expression, or none of them should. (inconsistent-return-statements)
       W0622, # built-in is being redefined: Redefining built-in 'type' (redefined-builtin)
-      W1514,  # unspecified-encoding
+      W1514, # unspecified-encoding
       E0211,
       E1102,
       E1101, # no-member
-      C0103  # invalid-name
+      C0103, # invalid-name
+      R0902  #too-many-instance-attributes
 
 # Analyse import fallback blocks. This can be used to support both Python 2 and
 # 3 compatible code, which means that the block might have code that exists

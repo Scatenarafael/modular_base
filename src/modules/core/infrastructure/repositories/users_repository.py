@@ -5,9 +5,10 @@ from passlib.context import CryptContext
 from sqlalchemy import delete, orm, select
 
 from src.infrastructure.database.settings.connection import DbConnectionHandler
+from src.modules.core.domain.dtos.users.user_dtos import PayloadCreateUserDTO, PayloadUpdateUserDTO
 from src.modules.core.domain.entities.User import User
 from src.modules.core.domain.interfaces.iusers_repository import IUsersRepository
-from src.modules.core.infrastructure.mappers.user_mapper import PayloadUpdateUser, UserMapper
+from src.modules.core.infrastructure.mappers.user_mapper import UserMapper
 from src.modules.core.infrastructure.models.company_model import CompanyModel
 from src.modules.core.infrastructure.models.role_model import RoleModel
 from src.modules.core.infrastructure.models.user_company_role_model import UserCompanyRoleModel
@@ -36,15 +37,15 @@ class UsersRepository(IUsersRepository):
                 raise exception
 
     @classmethod
-    async def create(cls, user: User) -> Optional[User]:
+    async def create(cls, payload: PayloadCreateUserDTO) -> Optional[User]:
         async with DbConnectionHandler() as database:
             try:
                 new_register = UserModel(
-                    first_name=user.first_name,
-                    last_name=user.last_name,
-                    email=user.email,
-                    hashed_password=pwd_ctx.hash(user.password),
-                    active=user.active,
+                    first_name=payload.first_name,
+                    last_name=payload.last_name,
+                    email=payload.email,
+                    hashed_password=pwd_ctx.hash(payload.password),
+                    active=payload.active,
                 )
 
                 if not new_register:
@@ -121,7 +122,7 @@ class UsersRepository(IUsersRepository):
                 raise exception
 
     @classmethod
-    async def partial_update_by_id(cls, id: UUID, payload: PayloadUpdateUser) -> Optional[User]:
+    async def partial_update_by_id(cls, id: UUID, payload: PayloadUpdateUserDTO) -> Optional[User]:
         async with DbConnectionHandler() as database:
             try:
                 first_name = payload.first_name

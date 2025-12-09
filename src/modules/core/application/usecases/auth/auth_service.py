@@ -1,36 +1,16 @@
-# type: ignore
 import hmac
 import uuid
 from datetime import datetime, timedelta, timezone
 
 from sqlalchemy import inspect
 
-from src.infra.security import create_access_token, generate_refresh_token_raw, hash_refresh_token, verify_access_token
-from src.infra.settings.config import get_settings
-from src.infra.settings.logging_config import app_logger
-from src.interfaces.ijwt_repository import IJWTRepository
-from src.interfaces.iusers_repository import IUsersRepository
+from src.core.config.config import get_settings
+from src.modules.core.application.usecases.auth.utils import InvalidCredentials
+from src.modules.core.domain.interfaces.ijwt_repository import IJWTRepository
+from src.modules.core.domain.interfaces.iusers_repository import IUsersRepository
+from src.modules.core.infrastructure.repositories.jwt.security import create_access_token, generate_refresh_token_raw, hash_refresh_token, verify_access_token
 
 settings = get_settings()
-
-
-# Exceções específicas
-class AuthError(Exception): ...
-
-
-class InvalidCredentials(AuthError): ...
-
-
-class RefreshNotFound(AuthError): ...
-
-
-class RefreshReuseDetected(AuthError): ...
-
-
-class RefreshExpired(AuthError): ...
-
-
-class RefreshInvalid(AuthError): ...
 
 
 def model_to_dict(model):
@@ -50,33 +30,23 @@ class AuthService:
 
     # validating user and password, returning access and refresh tokens
     async def login(self, email: str, password: str):
-        app_logger.debug(f"[AUTH SERVICE] [LOGIN] email: {email}")
-
         # Initial authentication
         user = await self.user_repo.get_by_email(email)
 
-        user_json = user.to_dict() if user else None
-
-        app_logger.debug(f"[AUTH SERVICE] [LOGIN] user_json: {user_json}")
-        app_logger.debug(f"[AUTH SERVICE] [LOGIN] user_json.get(hashed_password): {user_json.get('hashed_password')}")
+        user_json = user if user else None
 
         if not user_json or not self.user_repo.verify_password(password, user_json.get("hashed_password")):
-            app_logger.error("[AUTH SERVICE] [LOGIN] Could not authenticate user")
             raise InvalidCredentials("Usuário ou senha inválidos")
 
         # creating access token
         access = create_access_token(str(user_json.get("id")))
-        app_logger.debug(f"[AUTH SERVICE] [LOGIN] access: {access}")
 
         # creating refresh token
         raw_refresh = generate_refresh_token_raw()
         refresh_hash = hash_refresh_token(raw_refresh)
-        app_logger.debug(f"[AUTH SERVICE] [LOGIN] refresh_hash: {refresh_hash}")
 
         jti = self._new_jti()
-        app_logger.debug(f"[AUTH SERVICE] [LOGIN] jti: {jti}")
         expires_at = datetime.now(timezone.utc) + timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS)
-        app_logger.debug(f"[AUTH SERVICE] [LOGIN] expires_at: {expires_at}")
 
         await self.token_repo.save_refresh_token(
             jti=jti,
@@ -142,33 +112,23 @@ class AuthService:
     async def logout_by_cookie(self, raw_refresh: str, jti: str) -> bool:
         rec = await self.token_repo.get_by_jti(jti)
 
-        app_logger.info(f"[AUTH SERVICE] [LOGOUT BY COOKIE] rec: {rec}, raw_refresh: {raw_refresh}, jti: {jti}")
-
         if rec and hmac.compare_digest(rec.token_hash, hash_refresh_token(raw_refresh)):
             await self.token_repo.revoke_token(rec)
             return True
         return False
 
     async def return_user_by_access_token(self, access_token: str):
-        app_logger.debug(f"[AUTH SERVICE] [RETURN USER BY ACCESS TOKEN] access_token: {access_token}")
-
         payload = verify_access_token(access_token)
-
-        app_logger.debug(f"[AUTH SERVICE] [RETURN USER BY ACCESS TOKEN] payload: {payload}")
 
         if not payload:
             raise InvalidCredentials("Token is not valid")
 
         user_id = payload.get("sub")
 
-        app_logger.debug(f"[AUTH SERVICE] [RETURN USER BY ACCESS TOKEN] user_id: {user_id}")
-
         if not user_id:
             raise InvalidCredentials("Token is not valid")
 
         user = await self.user_repo.get_by_id(user_id)
-
-        app_logger.debug(f"[AUTH SERVICE] [RETURN USER BY ACCESS TOKEN] user: {user}")
 
         # rows = user.mappings().all()
 
@@ -182,5 +142,4 @@ class AuthService:
             delattr(user, "hashed_password")  # remove hashed_password before returning
         # delattr(user_from_row, "hashed_password")  # remove hashed_password before returning
 
-        app_logger.debug(f"[AUTH SERVICE] [RETURN USER BY ACCESS TOKEN] [AFTER DELATTR] user: {user}")
         return user

@@ -4,6 +4,7 @@ from sqlalchemy import MetaData
 
 from src.modules.core.presentation.http.middlewares.auth_middleware import AuthMiddleware
 from src.modules.core.presentation.http.routers.auth import auth_router
+from src.modules.core.presentation.http.routers.users import user_router
 
 origins = [
     "http://localhost",
@@ -30,7 +31,7 @@ app.add_middleware(AuthMiddleware)
 
 
 app.include_router(auth_router.router)
-# app.include_router(user_router.router)
+app.include_router(user_router.router)
 # app.include_router(company_router.router)
 # app.include_router(role_router.router)
 # app.include_router(link_user_to_company_router.router)

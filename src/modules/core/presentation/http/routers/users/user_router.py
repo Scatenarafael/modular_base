@@ -5,16 +5,16 @@ from src.modules.core.application.usecases.users.delete_user_usecase import Dele
 from src.modules.core.application.usecases.users.list_users_usecase import ListUsersUseCase
 from src.modules.core.application.usecases.users.retrieve_user_usecase import RetrieveUserUseCase
 from src.modules.core.application.usecases.users.update_user_usecase import UpdateUserUseCase
-from src.modules.core.infrastructure.mappers.user_mapper import PayloadUpdateUser
 from src.modules.core.presentation.http.routers.users.utils import get_create_user_usecase, get_delete_user_usecase, get_list_users_usecase, get_retrieve_user_usecase, get_update_user_usecase
-from src.modules.core.presentation.http.schemas.pydantic.user_schema import UserRequestBody
+from src.modules.core.presentation.http.schemas.dtos.users_dto import CreateUserPayloadDTO, UpdateUserPayloadDTO
+from src.modules.core.presentation.http.schemas.pydantic.user_schema import PayloadUpdateUser, UserRequestBody
 
 router = APIRouter(tags=["users"], prefix="/users")
 
 
 @router.post("/register")
 async def create(payload: UserRequestBody, create_usecase: CreateUserUseCase = Depends(get_create_user_usecase)):
-    new_user = await create_usecase.execute(first_name=payload.first_name, last_name=payload.last_name, email=payload.email, password=payload.password, active=payload.active)
+    new_user = await create_usecase.execute(payload=CreateUserPayloadDTO().to_usecase(payload))
     return new_user
 
 
@@ -32,7 +32,7 @@ async def retrieve(user_id: str, retrieve_user_usecase: RetrieveUserUseCase = De
 
 @router.patch("/{user_id}")
 async def update(user_id: str, payload: PayloadUpdateUser, update_usecase: UpdateUserUseCase = Depends(get_update_user_usecase)):
-    updated_user = await update_usecase.execute(user_id, payload=payload)
+    updated_user = await update_usecase.execute(user_id, payload=UpdateUserPayloadDTO().to_usecase(payload))
     return updated_user
 
 

@@ -2,8 +2,8 @@ from abc import ABC, abstractmethod
 from typing import Awaitable, Optional
 from uuid import UUID
 
+from src.modules.core.domain.dtos.users.user_dtos import PayloadCreateUserDTO, PayloadUpdateUserDTO
 from src.modules.core.domain.entities.User import User
-from src.modules.core.infrastructure.mappers.user_mapper import PayloadUpdateUser
 
 
 class IUsersRepository(ABC):
@@ -12,7 +12,7 @@ class IUsersRepository(ABC):
         pass
 
     @abstractmethod
-    async def create(self, user: User) -> Awaitable[Optional[User]]:
+    async def create(self, payload: PayloadCreateUserDTO) -> Awaitable[Optional[User]]:
         pass
 
     @abstractmethod
@@ -24,7 +24,7 @@ class IUsersRepository(ABC):
         pass
 
     @abstractmethod
-    async def partial_update_by_id(self, id: UUID, payload: PayloadUpdateUser) -> Awaitable[Optional[User]]:
+    async def partial_update_by_id(self, id: UUID, payload: PayloadUpdateUserDTO) -> Awaitable[Optional[User]]:
         pass
 
     @abstractmethod

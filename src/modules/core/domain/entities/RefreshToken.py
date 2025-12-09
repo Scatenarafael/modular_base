@@ -3,9 +3,10 @@ from __future__ import annotations
 import uuid
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
-from src.modules.core.domain.entities.User import User
+if TYPE_CHECKING:
+    from src.modules.core.domain.entities.User import User
 
 
 @dataclass

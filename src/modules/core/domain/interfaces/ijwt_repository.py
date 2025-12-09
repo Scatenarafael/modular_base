@@ -1,8 +1,11 @@
+from __future__ import annotations
+
 from abc import ABC, abstractmethod
 from datetime import datetime
-from typing import Awaitable, Optional
+from typing import TYPE_CHECKING, Awaitable, Optional
 
-from src.modules.core.domain.entities.RefreshToken import RefreshToken
+if TYPE_CHECKING:
+    from src.modules.core.domain.entities.RefreshToken import RefreshToken
 
 
 class IJWTRepository(ABC):

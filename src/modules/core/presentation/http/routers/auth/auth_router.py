@@ -2,7 +2,8 @@
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 
 from src.core.config.config import get_settings
-from src.modules.core.application.usecases.auth_service import AuthService, InvalidCredentials, RefreshExpired, RefreshInvalid, RefreshNotFound, RefreshReuseDetected
+from src.modules.core.application.usecases.auth.auth_service import AuthService
+from src.modules.core.application.usecases.auth.utils import InvalidCredentials, RefreshExpired, RefreshInvalid, RefreshNotFound, RefreshReuseDetected
 from src.modules.core.presentation.http.routers.auth.utils import _set_access_cookie, _set_refresh_cookie, get_auth_service
 from src.modules.core.presentation.http.schemas.pydantic.auth_schema import LoginRequestBody
 

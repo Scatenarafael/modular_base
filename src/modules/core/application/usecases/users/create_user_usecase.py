@@ -1,6 +1,7 @@
 from typing import Optional, cast
 
 from src.modules.core.application.dtos.users.user_dto import UserDTO
+from src.modules.core.domain.dtos.users.user_dtos import PayloadCreateUserDTO
 from src.modules.core.domain.entities.User import User
 from src.modules.core.domain.interfaces.iusers_repository import IUsersRepository
 
@@ -9,10 +10,8 @@ class CreateUserUseCase:
     def __init__(self, users_repository: IUsersRepository):
         self.users_repository = users_repository
 
-    async def execute(self, first_name: str, last_name: str, email: str, password: str, active: bool) -> Optional[UserDTO]:
-        user = User(first_name=first_name, last_name=last_name, email=email, password=password, active=active)
-
-        created_user = await self.users_repository.create(user)
+    async def execute(self, payload: PayloadCreateUserDTO) -> Optional[UserDTO]:
+        created_user = await self.users_repository.create(payload)
 
         if created_user is None:
             return None

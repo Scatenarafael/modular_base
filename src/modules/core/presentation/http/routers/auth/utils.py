@@ -1,8 +1,8 @@
 from fastapi import Response
 
 from src.core.config.config import get_settings
-from src.modules.core.application.usecases.auth_service import AuthService
-from src.modules.core.infrastructure.repositories.jwt_repository import JWTRepository
+from src.modules.core.application.usecases.auth.auth_service import AuthService
+from src.modules.core.infrastructure.repositories.jwt.jwt_repository import JWTRepository
 from src.modules.core.infrastructure.repositories.users_repository import UsersRepository
 
 settings = get_settings()
