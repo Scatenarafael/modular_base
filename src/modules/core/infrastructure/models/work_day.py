@@ -17,6 +17,6 @@ class WorkDay(Base):
 
     is_holiday = Column(Boolean, nullable=False, default=False)
 
-    role = relationship("Role", back_populates="work_days")
+    role = relationship("RoleModel", back_populates="work_days")
 
     work_shifts = relationship("WorkShift", back_populates="work_day", cascade="all, delete-orphan", passive_deletes=True)

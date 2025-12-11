@@ -1,11 +1,14 @@
 import hmac
 import uuid
 from datetime import datetime, timedelta, timezone
+from typing import cast
 
 from sqlalchemy import inspect
 
 from src.core.config.config import get_settings
-from src.modules.core.application.usecases.auth.utils import InvalidCredentials
+from src.modules.core.application.usecases.auth.utils import InvalidCredentials, RefreshExpired, RefreshInvalid, RefreshReuseDetected
+from src.modules.core.domain.entities.RefreshToken import RefreshToken
+from src.modules.core.domain.entities.User import User
 from src.modules.core.domain.interfaces.ijwt_repository import IJWTRepository
 from src.modules.core.domain.interfaces.iusers_repository import IUsersRepository
 from src.modules.core.infrastructure.repositories.jwt.security import create_access_token, generate_refresh_token_raw, hash_refresh_token, verify_access_token
@@ -33,13 +36,18 @@ class AuthService:
         # Initial authentication
         user = await self.user_repo.get_by_email(email)
 
-        user_json = user if user else None
+        if not user:
+            raise InvalidCredentials("Invalid email or password")
 
-        if not user_json or not self.user_repo.verify_password(password, user_json.get("hashed_password")):
-            raise InvalidCredentials("Usuário ou senha inválidos")
+        user = cast(User, user)
+
+        is_password_valid = self.user_repo.verify_password(password, user.hashed_password)
+
+        if not is_password_valid:
+            raise InvalidCredentials("Invalid email or password")
 
         # creating access token
-        access = create_access_token(str(user_json.get("id")))
+        access = create_access_token(str(user.id))
 
         # creating refresh token
         raw_refresh = generate_refresh_token_raw()
@@ -50,39 +58,39 @@ class AuthService:
 
         await self.token_repo.save_refresh_token(
             jti=jti,
-            user_id=str(user_json.get("id")),
+            user_id=str(user.id),
             token_hash=refresh_hash,
             expires_at=expires_at,
         )
 
-        return {"access_token": access, "refresh_token": raw_refresh, "refresh_jti": jti, "user_id": str(user_json.get("id"))}
+        return {"access_token": access, "refresh_token": raw_refresh, "refresh_jti": jti, "user_id": str(user.id)}
 
     async def rotate_refresh(self, raw_refresh: str, jti: str):
         # refreshing token
         record_model = await self.token_repo.get_by_jti(jti)
 
-        record = record_model.to_dict() if record_model else None
+        if not record_model:
+            raise InvalidCredentials("Refresh token não encontrado")
 
-        if not record:
-            raise RefreshNotFound("Refresh token não encontrado")
+        record_model = cast(RefreshToken, record_model)
 
-        if record.get("revoked"):
+        if record_model.revoked:
             # recicling detected → lets revolke this user chain
-            await self.token_repo.revoke_all_for_user(str(record.get("user_id")))
+            await self.token_repo.revoke_all_for_user(str(record_model.user_id))
             raise RefreshReuseDetected("Refresh reutilizado. Sessões revogadas.")
 
         # validates the hash securely
-        if not hmac.compare_digest(record.get("token_hash"), hash_refresh_token(raw_refresh)):
-            await self.token_repo.revoke_all_for_user(str(record.get("user_id")))
+        if not hmac.compare_digest(record_model.token_hash, hash_refresh_token(raw_refresh)):
+            await self.token_repo.revoke_all_for_user(str(record_model.user_id))
             raise RefreshInvalid("Refresh inválido. Sessões revogadas.")
 
-        expires_at = datetime.fromisoformat(record["expires_at"])  # string -> datetime
+        expires_at = record_model.expires_at if isinstance(record_model.expires_at, datetime) else datetime.fromisoformat(record_model.expires_at)
 
         if expires_at < datetime.now(timezone.utc):
             raise RefreshExpired("Refresh expirado")
 
         # revokes old refresh token
-        await self.token_repo.revoke_all_for_user(str(record.get("user_id")))
+        await self.token_repo.revoke_all_for_user(str(record_model.user_id))
         # await self.token_repo.revoke_token(record_model, replaced_by=new_jti)
 
         # recicling should be done only if refresh_token is valid and not expired
@@ -94,23 +102,25 @@ class AuthService:
         # saving new refresh token
         await self.token_repo.save_refresh_token(
             jti=new_jti,
-            user_id=record.get("user_id"),
+            user_id=str(record_model.user_id),
             token_hash=new_hash,
             expires_at=new_expires,
         )
 
         # new access token
-        new_access = create_access_token(str(record.get("user_id")))
+        new_access = create_access_token(str(record_model.user_id))
 
         return {
             "access_token": new_access,
             "refresh_token": new_raw,
             "refresh_jti": new_jti,
-            "user_id": str(record.get("user_id")),
+            "user_id": str(record_model.user_id),
         }
 
     async def logout_by_cookie(self, raw_refresh: str, jti: str) -> bool:
         rec = await self.token_repo.get_by_jti(jti)
+
+        rec = cast(RefreshToken, rec)
 
         if rec and hmac.compare_digest(rec.token_hash, hash_refresh_token(raw_refresh)):
             await self.token_repo.revoke_token(rec)
@@ -129,6 +139,8 @@ class AuthService:
             raise InvalidCredentials("Token is not valid")
 
         user = await self.user_repo.get_by_id(user_id)
+
+        user = cast(User, user)
 
         # rows = user.mappings().all()
 

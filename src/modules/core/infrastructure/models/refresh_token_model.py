@@ -29,7 +29,7 @@ class RefreshTokenModel(Base):
     revoked = Column(Boolean, default=False)
     replaced_by = Column(String, nullable=True)
 
-    user = relationship("User", back_populates="refresh_tokens")
+    user = relationship("UserModel", back_populates="refresh_tokens")
 
     def to_dict(self) -> RefreshTokenDict:
         data = {c.key: getattr(self, c.key) for c in inspect(self).mapper.column_attrs}

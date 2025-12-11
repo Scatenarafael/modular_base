@@ -16,9 +16,9 @@ class UserCompanyRoleModel(Base):
     role_id = Column(UUID(as_uuid=True), ForeignKey("roles.id", ondelete="SET NULL"), nullable=True)
     is_owner = Column(Boolean, default=False)
 
-    user = relationship("User", back_populates="companies_roles")
-    company = relationship("Company", back_populates="users_roles")
-    role = relationship("Role", back_populates="user_company_roles")
+    user = relationship("UserModel", back_populates="companies_roles")
+    company = relationship("CompanyModel", back_populates="users_roles")
+    role = relationship("RoleModel", back_populates="user_company_roles")
 
     def __repr__(self):
         return f"<UserCompanyRole(user_id='{self.user_id}', company_id='{self.company_id}', role_id='{self.role_id}')>"

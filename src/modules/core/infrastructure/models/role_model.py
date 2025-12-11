@@ -17,9 +17,9 @@ class RoleModel(Base):
 
     number_of_cooldown_days: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
 
-    user_company_roles = relationship("UserCompanyRole", back_populates="role")
+    user_company_roles = relationship("UserCompanyRoleModel", back_populates="role")
 
-    company = relationship("Company", back_populates="roles")
+    company = relationship("CompanyModel", back_populates="roles")
     work_days = relationship("WorkDay", back_populates="role", cascade="all, delete-orphan", passive_deletes=True)
 
     def __repr__(self):

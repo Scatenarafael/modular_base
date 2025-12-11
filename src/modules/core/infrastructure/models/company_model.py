@@ -13,9 +13,9 @@ class CompanyModel(Base):
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     name = Column(String, index=True)
 
-    users_roles = relationship("UserCompanyRole", back_populates="company", cascade="all, delete-orphan", passive_deletes=True)  # importante p/ ondelete funcionar no BD
+    users_roles = relationship("UserCompanyRoleModel", back_populates="company", cascade="all, delete-orphan", passive_deletes=True)  # importante p/ ondelete funcionar no BD
     roles = relationship(
-        "Role",
+        "RoleModel",
         back_populates="company",
         cascade="all, delete-orphan",
         passive_deletes=True,
