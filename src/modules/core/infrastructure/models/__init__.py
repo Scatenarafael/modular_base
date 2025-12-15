@@ -4,23 +4,3 @@ from .refresh_token_model import RefreshTokenModel
 from .role_model import RoleModel
 from .user_company_role_model import UserCompanyRoleModel
 from .user_model import UserModel
-from .work_day import WorkDay
-from .work_shift import WorkShift
-
-# # src/domain/entities/__init__.py
-
-# from src.domain.entities.company import Company
-# from src.domain.entities.role import Role
-# from src.domain.entities.user import User
-# from src.domain.entities.user_company_role import UserCompanyRole
-# from src.domain.entities.work_day import WorkDay
-# from src.domain.entities.work_shift import WorkShift
-
-# __all__ = [
-#     "User",
-#     "Company",
-#     "Role",
-#     "WorkDay",
-#     "WorkShift",
-#     "UserCompanyRole",
-# ]

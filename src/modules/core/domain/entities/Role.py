@@ -8,7 +8,6 @@ if TYPE_CHECKING:
     from src.modules.core.domain.entities.Company import Company
     from src.modules.core.domain.entities.User import User
     from src.modules.core.domain.entities.UserCompanyRole import UserCompanyRole
-    from src.modules.core.domain.entities.WorkDay import WorkDay
 
 
 @dataclass
@@ -20,7 +19,6 @@ class Role:
 
     company: Optional[Company] = None
     user_company_roles: list[UserCompanyRole] = field(default_factory=list)
-    work_days: list[WorkDay] = field(default_factory=list)
 
     def assign_to_user_in_company(
         self,

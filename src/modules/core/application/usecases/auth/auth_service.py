@@ -3,8 +3,6 @@ import uuid
 from datetime import datetime, timedelta, timezone
 from typing import cast
 
-from sqlalchemy import inspect
-
 from src.core.config.config import get_settings
 from src.modules.core.application.usecases.auth.utils import InvalidCredentials, RefreshExpired, RefreshInvalid, RefreshReuseDetected
 from src.modules.core.domain.entities.RefreshToken import RefreshToken
@@ -14,11 +12,6 @@ from src.modules.core.domain.interfaces.iusers_repository import IUsersRepositor
 from src.modules.core.infrastructure.repositories.jwt.security import create_access_token, generate_refresh_token_raw, hash_refresh_token, verify_access_token
 
 settings = get_settings()
-
-
-def model_to_dict(model):
-    """Convert a SQLAlchemy model instance to a dictionary."""
-    return {c.key: getattr(model, c.key) for c in inspect(model).mapper.column_attrs}
 
 
 class AuthService:
@@ -142,16 +135,8 @@ class AuthService:
 
         user = cast(User, user)
 
-        # rows = user.mappings().all()
-
-        # for row in rows:
-        #     user_from_row = row["User"]
-
-        # if not user_from_row:
-        #     raise InvalidCredentials("User not found")
-
         if hasattr(user, "hashed_password"):
             delattr(user, "hashed_password")  # remove hashed_password before returning
-        # delattr(user_from_row, "hashed_password")  # remove hashed_password before returning
 
+        print("user:", user)
         return user

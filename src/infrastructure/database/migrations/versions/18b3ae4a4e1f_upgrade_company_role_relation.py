@@ -9,13 +9,12 @@ Create Date: 2025-11-20 15:59:06.265029
 from typing import Sequence, Union
 
 import sqlalchemy as sa
-from sqlalchemy.dialects import postgresql
-
 from alembic import op
+from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
 revision: str = "18b3ae4a4e1f"
-down_revision: Union[str, Sequence[str], None] = "f504067f3889"
+down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 

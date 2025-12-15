@@ -20,7 +20,6 @@ class RoleModel(Base):
     user_company_roles = relationship("UserCompanyRoleModel", back_populates="role")
 
     company = relationship("CompanyModel", back_populates="roles")
-    work_days = relationship("WorkDay", back_populates="role", cascade="all, delete-orphan", passive_deletes=True)
 
     def __repr__(self):
         return f"<Role(id='{self.id}', name='{self.name}')>"
