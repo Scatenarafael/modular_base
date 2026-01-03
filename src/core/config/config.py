@@ -34,6 +34,17 @@ class Settings(BaseSettings):
 
     ACCESS_SECRET: str = os.getenv("ACCESS_SECRET", "change-me-super-secret")
 
+    # email (SMTP)
+    EMAIL_HOST: str = os.getenv("EMAIL_HOST", "")
+    EMAIL_PORT: int = int(os.getenv("EMAIL_PORT", "587"))
+    EMAIL_USERNAME: str = os.getenv("EMAIL_USERNAME", "")
+    EMAIL_PASSWORD: str = os.getenv("EMAIL_PASSWORD", "")
+    EMAIL_USE_TLS: bool = os.getenv("EMAIL_USE_TLS", "true").lower() == "true"
+    EMAIL_USE_SSL: bool = os.getenv("EMAIL_USE_SSL", "false").lower() == "true"
+    EMAIL_FROM: str = os.getenv("EMAIL_FROM", "")
+    EMAIL_FROM_NAME: str = os.getenv("EMAIL_FROM_NAME", "")
+    EMAIL_TIMEOUT: int = int(os.getenv("EMAIL_TIMEOUT", "10"))
+
     class Config:
         env_file = ".env"
 
