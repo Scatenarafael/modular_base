@@ -20,7 +20,10 @@ disable =
       E1102,
       E1101, # no-member
       C0103, # invalid-name
-      R0902  #too-many-instance-attributes
+      R0902,  #too-many-instance-attributes
+      E0402,  # Attempted relative import beyond top-level package
+      W0613  # unused-argument
+
 
 # Analyse import fallback blocks. This can be used to support both Python 2 and
 # 3 compatible code, which means that the block might have code that exists
