@@ -5,7 +5,7 @@ from src.modules.core.application.usecases.users.delete_user_usecase import Dele
 from src.modules.core.application.usecases.users.list_users_usecase import ListUsersUseCase
 from src.modules.core.application.usecases.users.retrieve_user_usecase import RetrieveUserUseCase
 from src.modules.core.application.usecases.users.update_user_usecase import UpdateUserUseCase
-from src.modules.core.presentation.http.routers.users.utils import get_create_user_usecase, get_delete_user_usecase, get_list_users_usecase, get_retrieve_user_usecase, get_update_user_usecase
+from src.modules.core.presentation.http.dependencies.users_dependencies import get_create_user_usecase, get_delete_user_usecase, get_list_users_usecase, get_retrieve_user_usecase, get_update_user_usecase
 from src.modules.core.presentation.http.schemas.dtos.users_dto import CreateUserPayloadDTO, UpdateUserPayloadDTO
 from src.modules.core.presentation.http.schemas.pydantic.user_schema import PayloadUpdateUser, UserRequestBody
 

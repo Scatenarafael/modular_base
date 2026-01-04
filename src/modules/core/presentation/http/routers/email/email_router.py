@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 
 from src.modules.core.application.usecases.email.send_email_usecase import SendEmailUseCase
-from src.modules.core.presentation.http.routers.email.utils import get_send_email_usecase
+from src.modules.core.presentation.http.dependencies.email_dependencies import get_send_email_usecase
 from src.modules.core.presentation.http.schemas.dtos.email_dto import SendEmailPayloadDTO
 from src.modules.core.presentation.http.schemas.pydantic.email_schema import SendEmailRequestBody
 

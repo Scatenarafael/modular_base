@@ -2,5 +2,9 @@ from src.infrastructure.external_services.email_service.mailjet_email_service im
 from src.modules.core.application.usecases.email.send_email_usecase import SendEmailUseCase
 
 
-def get_send_email_usecase():
-    return SendEmailUseCase(MailjetEmailService(from_email="rafascatena@gmail.com", from_name="Scatena Delivery"))
+def get_email_service() -> MailjetEmailService:
+    return MailjetEmailService()
+
+
+def get_send_email_usecase() -> SendEmailUseCase:
+    return SendEmailUseCase(email_service=get_email_service())

@@ -4,7 +4,8 @@ from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 from src.core.config.config import get_settings
 from src.modules.core.application.usecases.auth.auth_service import AuthService
 from src.modules.core.application.usecases.auth.utils import InvalidCredentials, RefreshExpired, RefreshInvalid, RefreshNotFound, RefreshReuseDetected
-from src.modules.core.presentation.http.routers.auth.utils import _set_access_cookie, _set_refresh_cookie, get_auth_service
+from src.modules.core.presentation.http.dependencies.auth_dependencies import get_auth_service
+from src.modules.core.presentation.http.routers.auth.cookies import set_access_cookie, set_refresh_cookie
 from src.modules.core.presentation.http.schemas.pydantic.auth_schema import LoginRequestBody
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -22,8 +23,8 @@ async def login(response: Response, body: LoginRequestBody, auth_service: AuthSe
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=str(e)) from e
 
     # coloca access + refresh em cookies HttpOnly
-    _set_access_cookie(response, result["access_token"])
-    _set_refresh_cookie(response, result["refresh_jti"], result["refresh_token"])
+    set_access_cookie(response, result["access_token"])
+    set_refresh_cookie(response, result["refresh_jti"], result["refresh_token"])
 
     # opcional: retornar user_id ou outros dados minimalistas
     return {"user_id": result["user_id"]}
@@ -54,8 +55,8 @@ async def refresh(request: Request, response: Response, auth_service: AuthServic
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=str(e)) from e
 
     # sobrescreve cookies com novos tokens
-    _set_access_cookie(response, new["access_token"])
-    _set_refresh_cookie(response, new["refresh_jti"], new["refresh_token"])
+    set_access_cookie(response, new["access_token"])
+    set_refresh_cookie(response, new["refresh_jti"], new["refresh_token"])
 
     return {"user_id": new["user_id"]}
 
