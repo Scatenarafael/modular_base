@@ -3,6 +3,7 @@ from uuid import UUID
 
 from passlib.context import CryptContext
 from sqlalchemy import delete, orm, select
+from sqlalchemy.exc import IntegrityError
 
 from src.infrastructure.database.settings.connection import DbConnectionHandler
 from src.modules.core.domain.dtos.users.user_dtos import PayloadCreateUserDTO, PayloadUpdateUserDTO
@@ -40,6 +41,11 @@ class UsersRepository(IUsersRepository):
     async def create(cls, payload: PayloadCreateUserDTO) -> Optional[User]:
         async with DbConnectionHandler() as database:
             try:
+                if database.session:
+                    exists = await database.session.execute(select(UserModel.id).where(UserModel.email == payload.email))
+                    if exists.scalar() is not None:
+                        raise ValueError("Email already exists")
+
                 new_register = UserModel(
                     first_name=payload.first_name,
                     last_name=payload.last_name,
@@ -63,7 +69,13 @@ class UsersRepository(IUsersRepository):
                     user = UserMapper.to_entity(new_register)
 
                     return user
+            except IntegrityError as exception:
+                if database.session:
+                    await database.session.rollback()
+                raise ValueError("Email already exists") from exception
             except Exception as exception:
+                if database.session:
+                    await database.session.rollback()
                 raise exception
 
     @classmethod

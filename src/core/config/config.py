@@ -45,6 +45,10 @@ class Settings(BaseSettings):
     EMAIL_FROM_NAME: str = os.getenv("EMAIL_FROM_NAME", "")
     EMAIL_TIMEOUT: int = int(os.getenv("EMAIL_TIMEOUT", "10"))
 
+    # email (Mailjet)
+    MAILJET_API_KEY: str = os.getenv("MAILJET_API_KEY", os.getenv("MJ_APIKEY_PUBLIC", ""))
+    MAILJET_SECRET_KEY: str = os.getenv("MAILJET_SECRET_KEY", os.getenv("MJ_APIKEY_PRIVATE", ""))
+
     class Config:
         env_file = ".env"
 

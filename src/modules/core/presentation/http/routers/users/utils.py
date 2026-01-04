@@ -1,3 +1,4 @@
+from src.infrastructure.external_services.email_service.mailjet_email_service import MailjetEmailService
 from src.modules.core.application.usecases.users.create_user_usecase import CreateUserUseCase
 from src.modules.core.application.usecases.users.delete_user_usecase import DeleteUserUseCase
 from src.modules.core.application.usecases.users.list_users_usecase import ListUsersUseCase
@@ -7,7 +8,7 @@ from src.modules.core.infrastructure.repositories.users_repository import UsersR
 
 
 def get_create_user_usecase():
-    return CreateUserUseCase(UsersRepository())
+    return CreateUserUseCase(users_repository=UsersRepository(), email_service=MailjetEmailService(from_email="rafascatena@email.com", from_name="Rafael"))
 
 
 def get_list_users_usecase():

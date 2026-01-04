@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException, status
 
 from src.modules.core.application.usecases.users.create_user_usecase import CreateUserUseCase
 from src.modules.core.application.usecases.users.delete_user_usecase import DeleteUserUseCase
@@ -14,7 +14,10 @@ router = APIRouter(tags=["users"], prefix="/users")
 
 @router.post("/register")
 async def create(payload: UserRequestBody, create_usecase: CreateUserUseCase = Depends(get_create_user_usecase)):
-    new_user = await create_usecase.execute(payload=CreateUserPayloadDTO().to_usecase(payload))
+    try:
+        new_user = await create_usecase.execute(payload=CreateUserPayloadDTO().to_usecase(payload))
+    except ValueError as exc:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
     return new_user
 
 
